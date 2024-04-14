@@ -2,12 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import services to access SystemChrome
 
 void main() {
-  // Ensure widgets are initialized before setting the preferred orientations.
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Hide the status bar and the navigation bar.
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-
   runApp(MyApp());
 }
 
@@ -19,10 +15,8 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         backgroundColor:
             Colors.black, // True black background for the AOD effect
-        body: Stack(
-          children: [
-            AODNotificationWidget(),
-          ],
+        body: Center(
+          child: AODNotificationWidget(),
         ),
       ),
     );
@@ -32,17 +26,81 @@ class MyApp extends StatelessWidget {
 class AODNotificationWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Use MediaQuery to get the screen size for positioning your notification
-    Size screenSize = MediaQuery.of(context).size;
-
-    return Positioned(
-      top: screenSize.height * 0.5 - 0.5, // Centered vertically
-      left: screenSize.width * 0.5 - 0.5, // Centered horizontally
-      child: Container(
-        height: 1,
-        width: 1,
-        color: Colors.white, // Single white pixel
-      ),
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(
+          'MURADOĞLU',
+          style: TextStyle(
+            fontSize: 1.0, // Font size 1 pixel
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'MURAT BOZ',
+          style: TextStyle(
+            fontSize: 3.0, // Font size 1 pixel
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'EKREMOĞLU',
+          style: TextStyle(
+            fontSize: 5.0, // Font size 1 pixel
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'MELAK DENŞTAŞ',
+          style: TextStyle(
+            fontSize: 10.0, // Font size 1 pixel
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'EKREM İMARO',
+          style: TextStyle(
+            fontSize: 15.0, // Font size 1 pixel
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10), // Space between texts
+        Text(
+          'MURAT KAVURMA',
+          style: TextStyle(
+            fontSize: 17.0, // Font size 3 pixels
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10), // Space between texts
+        Text(
+          'FUAT KURUM',
+          style: TextStyle(
+            fontSize: 25.0, // Font size 5 pixels
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10), // Space between texts
+        Text(
+          'MİLADGORUN',
+          style: TextStyle(
+            fontSize: 25.0, // Font size 5 pixels
+            color: Colors.white,
+          ),
+        ),
+        SizedBox(height: 10), // Space between texts
+        Text(
+          'İMAMHATİPOĞLU',
+          style: TextStyle(
+            fontSize: 25.0, // Font size 5 pixels
+            color: Colors.white,
+          ),
+        ),
+      ],
     );
   }
 }
