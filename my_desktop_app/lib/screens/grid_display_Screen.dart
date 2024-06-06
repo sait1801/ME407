@@ -12,7 +12,10 @@ class GridDisplayScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Grid Display'),
       ),
-      body: PageView.builder(
+      body: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+        ),
         itemCount: gridImages.length,
         itemBuilder: (context, index) {
           return Image.file(gridImages[index]);

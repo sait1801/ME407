@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:my_desktop_app/providers/image_provider.dart';
-import 'package:my_desktop_app/screens/image_editable.dart';
 import 'package:my_desktop_app/screens/slicing_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
@@ -71,8 +70,14 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: model.droppedFiles.isNotEmpty
-            ? () {
-                _printImageSizes();
+            ? () async {
+                await _printImageSizes();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SlicingScreen(),
+                  ),
+                );
               }
             : () {
                 print("image null");
@@ -82,7 +87,7 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
     );
   }
 
-  void _printImageSizes() async {
+  Future<void> _printImageSizes() async {
     // This code print the size of image
     var model = Provider.of<ImageProviderModel>(context, listen: false);
     for (var file in model.droppedFiles) {
@@ -91,18 +96,18 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
       print(
           'Image: ${file.path}, Width: ${decodedImage.width}, Height: ${decodedImage.height}');
       await _convertImageToGray(file.path);
+
+      model.imageWidth = decodedImage.width;
+      model.imageHeigth = decodedImage.height;
+      if (model.imageHeigth > model.imageWidth) {
+        model.dpi = 4 / model.imageHeigth;
+      } else {
+        model.dpi = 4 / model.imageWidth;
+      }
+
       print(decodedImage.colorSpace);
     }
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SlicingScreen(),
-      ),
-    );
   }
-
-  //List of Grids on provider
-  void _sliceGrids() {}
 
   Future _convertImageToGray(String path) async {
     // This function converts image to grayscle and saves it to both provider 'grayImagePAth' and 'Desktop path'

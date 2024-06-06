@@ -6,6 +6,9 @@ class ImageProviderModel extends ChangeNotifier {
   late var decodedImage;
   List<File> _gridImages = [];
   String grayImagePath = '';
+  int imageWidth = 0;
+  int imageHeigth = 0;
+  double dpi = 0;
 
   List<File> get droppedFiles => _droppedFiles;
   List<File> get gridImages => _gridImages;

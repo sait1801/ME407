@@ -4,6 +4,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:my_desktop_app/providers/image_provider.dart';
 import 'package:my_desktop_app/screens/grid_display_Screen.dart';
 import 'package:provider/provider.dart';
+import 'package:image/image.dart' as img;
 
 class SlicingScreen extends StatefulWidget {
   @override
@@ -16,38 +17,24 @@ class _SlicingScreenState extends State<SlicingScreen> {
   final TextEditingController _gridWidthController = TextEditingController();
   String? _errorText;
 
+  late var model;
+
   @override
   void initState() {
     super.initState();
-    var model = Provider.of<ImageProviderModel>(context, listen: false);
-    if (model.droppedFiles.isNotEmpty) {
-      final firstImage = model.droppedFiles.first;
-      _widthController.text = (model.decodedImage!.width! / 96)
-          .toStringAsFixed(2); // Assuming 96 DPI
-      _heightController.text = (model.decodedImage!.height! / 96)
-          .toStringAsFixed(2); // Assuming 96 DPI
-    }
-  }
-
-  void _validateDimensions() {
-    final width = double.tryParse(_widthController.text) ?? 0;
-    final height = double.tryParse(_heightController.text) ?? 0;
-
-    if (width > 4 || height > 4) {
-      setState(() {
-        _errorText = 'Width and height must not exceed 4 inches';
-      });
-    } else {
-      setState(() {
-        _errorText = null;
-      });
-    }
+    model = Provider.of<ImageProviderModel>(context, listen: false);
+    _widthController.text = 4.toStringAsFixed(2); // Set to 4.00
+    _heightController.text = 4.toStringAsFixed(2); // Set to 4.00
   }
 
   void _printDimensions() {
+    var model = Provider.of<ImageProviderModel>(context, listen: false);
     final width = double.tryParse(_widthController.text) ?? 0;
     final height = double.tryParse(_heightController.text) ?? 0;
     final gridWidth = double.tryParse(_gridWidthController.text) ?? 0;
+
+    model.imageHeigth = height.toInt();
+    model.imageWidth = width.toInt();
 
     if (_errorText == null) {
       print(
@@ -57,27 +44,61 @@ class _SlicingScreenState extends State<SlicingScreen> {
     }
   }
 
-  void _showGrids() {
+  Future<List<File>> cropImageIntoGrids(
+      File imageFile, int rows, int cols) async {
+    List<File> gridImages = [];
+
+    // Decode the image file into an Image object
+    final decodedImage = img.decodeImage(await imageFile.readAsBytes());
+
+    // Get the dimensions of the image
+    final imageWidth = decodedImage!.width;
+    final imageHeight = decodedImage.height;
+
+    // Calculate the dimensions of each grid cell
+    final cellWidth = imageWidth ~/ cols;
+    final cellHeight = imageHeight ~/ rows;
+
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        // Calculate the coordinates of the current grid cell
+        final x = col * cellWidth;
+        final y = row * cellHeight;
+
+        // Crop the image to the current grid cell
+        final croppedImage = img.copyCrop(
+          decodedImage!,
+          x: x,
+          y: y,
+          height: cellWidth,
+          width: cellHeight,
+        );
+
+        // Encode the cropped image as a PNG file
+        final croppedImageFile = File('cropped_image_${row}_${col}.png');
+        await croppedImageFile.writeAsBytes(img.encodePng(croppedImage));
+
+        // Add the cropped image file to the list
+        gridImages.add(croppedImageFile);
+      }
+    }
+
+    return gridImages;
+  }
+
+  Future<void> _showGrids() async {
     var model = Provider.of<ImageProviderModel>(context, listen: false);
     final gridWidth = double.tryParse(_gridWidthController.text) ?? 0;
-    final gridSize =
-        gridWidth * 96; // Convert inches to pixels (assuming 96 DPI)
+    final gridSize = gridWidth * model.imageHeigth / 4;
 
     if (gridWidth > 0 && model.droppedFiles.isNotEmpty) {
-      final image = model.droppedFiles.first;
-      final decodedImage = model.decodedImage!;
-      final rows = (decodedImage.height! / gridSize).ceil();
-      final cols = (decodedImage.width! / gridSize).ceil();
-
       List<File> gridImages = [];
 
-      for (int row = 0; row < rows; row++) {
-        for (int col = 0; col < cols; col++) {
-          // Here you would slice the image into grids and save them as files
-          // For simplicity, we are just adding the original image multiple times
-          gridImages.add(image);
-        }
-      }
+      gridImages = await cropImageIntoGrids(
+        File(model.grayImagePath),
+        model.imageHeigth,
+        model.imageWidth,
+      );
 
       model.setGridImages(gridImages);
 
@@ -120,7 +141,7 @@ class _SlicingScreenState extends State<SlicingScreen> {
                       ),
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (_) => _validateDimensions(),
+                      enabled: false, // Set to non-editable
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -133,7 +154,7 @@ class _SlicingScreenState extends State<SlicingScreen> {
                       ),
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
-                      onChanged: (_) => _validateDimensions(),
+                      enabled: false, // Set to non-editable
                     ),
                   ),
                   const SizedBox(width: 10),
