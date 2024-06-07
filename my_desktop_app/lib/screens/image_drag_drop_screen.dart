@@ -99,11 +99,6 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
 
       model.imageWidth = decodedImage.width;
       model.imageHeigth = decodedImage.height;
-      if (model.imageHeigth > model.imageWidth) {
-        model.dpi = 4 / model.imageHeigth;
-      } else {
-        model.dpi = 4 / model.imageWidth;
-      }
 
       print(decodedImage.colorSpace);
     }

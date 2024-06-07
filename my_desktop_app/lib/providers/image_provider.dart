@@ -8,7 +8,9 @@ class ImageProviderModel extends ChangeNotifier {
   String grayImagePath = '';
   int imageWidth = 0;
   int imageHeigth = 0;
+  double sliceSize = 0;
   double dpi = 0;
+  Image? currentSlicedImage;
 
   List<File> get droppedFiles => _droppedFiles;
   List<File> get gridImages => _gridImages;

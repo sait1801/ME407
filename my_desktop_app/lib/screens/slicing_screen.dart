@@ -1,13 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:my_desktop_app/providers/image_provider.dart';
 import 'package:my_desktop_app/screens/grid_display_Screen.dart';
 import 'package:provider/provider.dart';
-import 'package:image/image.dart' as img;
+// print width : 3.1 mm, heigth : 2.4 mm
+//  width : 0.122047 inch, heigth: 0.0944882 inch
 
 class SlicingScreen extends StatefulWidget {
+  const SlicingScreen({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _SlicingScreenState createState() => _SlicingScreenState();
 }
 
@@ -17,6 +20,7 @@ class _SlicingScreenState extends State<SlicingScreen> {
   final TextEditingController _gridWidthController = TextEditingController();
   String? _errorText;
 
+  // ignore: prefer_typing_uninitialized_variables
   late var model;
 
   @override
@@ -33,96 +37,64 @@ class _SlicingScreenState extends State<SlicingScreen> {
     final height = double.tryParse(_heightController.text) ?? 0;
     final gridWidth = double.tryParse(_gridWidthController.text) ?? 0;
 
-    model.imageHeigth = height.toInt();
-    model.imageWidth = width.toInt();
-
     if (_errorText == null) {
-      print(
-          'Image Dimensions: Width: ${width} inches, Height: ${height} inches');
-      print('Grid Width: ${gridWidth} inches');
-      _showGrids();
+      print('Image Dimensions: Width: $width inches, Height: $height inches');
+      print('Grid Width: $gridWidth inches');
     }
   }
 
-  Future<List<File>> cropImageIntoGrids(
-      File imageFile, int rows, int cols) async {
-    List<File> gridImages = [];
+  // Future<List<File>> cropImageIntoGrids(
+  //     File imageFile, int rows, int cols) async {
+  //   List<File> gridImages = [];
 
-    // Decode the image file into an Image object
-    final decodedImage = img.decodeImage(await imageFile.readAsBytes());
+  //   // Decode the image file into an Image object
+  //   final decodedImage = img.decodeImage(await imageFile.readAsBytes());
 
-    // Get the dimensions of the image
-    final imageWidth = decodedImage!.width;
-    final imageHeight = decodedImage.height;
+  //   // Get the dimensions of the image
+  //   const imageWidthInch = 4;
+  //   const imageHeightInch = 4;
 
-    // Calculate the dimensions of each grid cell
-    final cellWidth = imageWidth ~/ cols;
-    final cellHeight = imageHeight ~/ rows;
+  //   // Calculate the dimensions of each grid cell
+  //   final cellWidth = imageWidthInch ~/ cols; // in inch
+  //   final cellHeight = imageHeightInch ~/ rows;
 
-    for (int row = 0; row < rows; row++) {
-      for (int col = 0; col < cols; col++) {
-        // Calculate the coordinates of the current grid cell
-        final x = col * cellWidth;
-        final y = row * cellHeight;
+  //   for (int row = 0; row < rows; row++) {
+  //     for (int col = 0; col < cols; col++) {
+  //       final x = col;
+  //       final y = row;
 
-        // Crop the image to the current grid cell
-        final croppedImage = img.copyCrop(
-          decodedImage!,
-          x: x,
-          y: y,
-          height: cellWidth,
-          width: cellHeight,
-        );
+  //       print("coordinate: $x,$y");
 
-        // Encode the cropped image as a PNG file
-        final croppedImageFile = File('cropped_image_${row}_${col}.png');
-        await croppedImageFile.writeAsBytes(img.encodePng(croppedImage));
+  //       // Crop the image to the current grid cell
+  //       final croppedImage = img.copyCrop(
+  //         decodedImage!,
+  //         x: x,
+  //         y: y,
+  //         height: cellWidth,
+  //         width: cellHeight,
+  //       );
 
-        // Add the cropped image file to the list
-        gridImages.add(croppedImageFile);
-      }
-    }
+  //       // Encode the cropped image as a PNG file
+  //       final croppedImageFile = File('cropped_image_${row}_$col.png');
+  //       await croppedImageFile.writeAsBytes(img.encodePng(croppedImage));
 
-    return gridImages;
-  }
+  //       // Add the cropped image file to the list
+  //       gridImages.add(croppedImageFile);
+  //     }
+  //   }
+  //   print("grid images length : ${gridImages.length}");
 
-  Future<void> _showGrids() async {
-    var model = Provider.of<ImageProviderModel>(context, listen: false);
-    final gridWidth = double.tryParse(_gridWidthController.text) ?? 0;
-    final gridSize = gridWidth * model.imageHeigth / 4;
-
-    if (gridWidth > 0 && model.droppedFiles.isNotEmpty) {
-      List<File> gridImages = [];
-
-      gridImages = await cropImageIntoGrids(
-        File(model.grayImagePath),
-        model.imageHeigth,
-        model.imageWidth,
-      );
-
-      model.setGridImages(gridImages);
-
-      print(model.gridImages.length);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => GridDisplayScreen(gridImages: gridImages),
-        ),
-      );
-    }
-  }
+  //   return gridImages;
+  // }
 
   @override
   Widget build(BuildContext context) {
     var model = Provider.of<ImageProviderModel>(context);
-    bool dragging = false;
     List<File> droppedFiles = model.droppedFiles;
-    String grayImagePath = model.grayImagePath;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Flutter Drag and Drop Demo'),
+        title: const Text('SLICING ALGORITHM'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -177,8 +149,6 @@ class _SlicingScreenState extends State<SlicingScreen> {
                 color: Colors.grey[300],
                 child: Stack(
                   children: [
-                    // if (grayImagePath != '')
-                    // Image.file(File.fromUri(grayImagePath))
                     if (droppedFiles.isNotEmpty)
                       Image.file(
                         droppedFiles.first,
@@ -191,7 +161,7 @@ class _SlicingScreenState extends State<SlicingScreen> {
                         gridWidth:
                             double.tryParse(_gridWidthController.text) ?? 0,
                       ),
-                      size: Size(4 * 96, 4 * 96),
+                      size: const Size(4 * 96, 4 * 96),
                     ),
                   ],
                 ),
@@ -201,7 +171,18 @@ class _SlicingScreenState extends State<SlicingScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _printDimensions,
+        onPressed: () async {
+          model.sliceSize = double.tryParse(_gridWidthController.text) ?? 0;
+
+          // _printDimensions();
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => GridDisplayScreen(),
+            ),
+          );
+          ;
+        },
         child: const Text('PRINT'),
       ),
     );
