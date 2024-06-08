@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:my_desktop_app/providers/image_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
@@ -20,13 +20,23 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
   @override
   void initState() {
     super.initState();
+    _enableKioskMode();
     _startCroppingProcess();
   }
 
   @override
   void dispose() {
     _timer?.cancel();
+    _disableKioskMode();
     super.dispose();
+  }
+
+  void _enableKioskMode() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+  }
+
+  void _disableKioskMode() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   void _startCroppingProcess() async {
@@ -77,15 +87,28 @@ class _GridDisplayScreenState extends State<GridDisplayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Grid Display'),
-      ),
-      body: Center(
-        child: _currentCroppedImage == null
-            ? const Text('No images to display')
-            : Image.memory(
-                Uint8List.fromList(img.encodePng(_currentCroppedImage!))),
+    return RawKeyboardListener(
+      focusNode: FocusNode(),
+      autofocus: true,
+      onKey: (event) {
+        if (event.logicalKey == LogicalKeyboardKey.keyQ) {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        body: _currentCroppedImage == null
+            ? const Center(child: Text('No images to display'))
+            : Container(
+                color: Colors.black,
+                child: Center(
+                  child: Image.memory(
+                    Uint8List.fromList(img.encodePng(_currentCroppedImage!)),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+              ),
       ),
     );
   }

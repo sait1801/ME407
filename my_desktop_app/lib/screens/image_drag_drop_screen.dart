@@ -36,10 +36,16 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
             });
           },
           onDragDone: (details) {
-            List<File> files =
-                details.files.map((file) => File(file.path)).toList();
-            Provider.of<ImageProviderModel>(context, listen: false)
-                .addFiles(files);
+            List<File> files = details.files
+                .map((file) => File(file.path))
+                .where((file) => _isImageFile(file))
+                .toList();
+
+            if (files.isNotEmpty) {
+              Provider.of<ImageProviderModel>(context, listen: false)
+                  .addFiles(files);
+            }
+
             setState(() {
               _dragging = false;
             });
@@ -87,8 +93,12 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
     );
   }
 
+  bool _isImageFile(File file) {
+    final extension = file.path.split('.').last.toLowerCase();
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'].contains(extension);
+  }
+
   Future<void> _printImageSizes() async {
-    // This code print the size of image
     var model = Provider.of<ImageProviderModel>(context, listen: false);
     for (var file in model.droppedFiles) {
       var decodedImage = await decodeImageFromList(file.readAsBytesSync());
@@ -105,27 +115,19 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
   }
 
   Future _convertImageToGray(String path) async {
-    // This function converts image to grayscle and saves it to both provider 'grayImagePAth' and 'Desktop path'
-
     var model = Provider.of<ImageProviderModel>(context, listen: false);
-    // Read the image from the given path
     final File imageFile = File(path);
     final Uint8List imageBytes = await imageFile.readAsBytes();
 
-    // Decode the image
     img.Image? image = img.decodeImage(imageBytes);
     if (image == null) {
       print('Error: Could not decode image.');
       return;
     }
 
-    // Convert the image to grayscale
     img.Image grayscaleImage = img.grayscale(image);
-
-    // Encode the grayscale image to PNG
     List<int> grayscaleBytes = img.encodePng(grayscaleImage);
 
-    // Save the grayscale image to a new file with `_gray` suffix
     String newPath = _addGraySuffixToFilename(path);
     final File grayscaleFile = File(newPath);
     await grayscaleFile.writeAsBytes(grayscaleBytes);
