@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:my_desktop_app/providers/image_provider.dart';
 import 'package:my_desktop_app/screens/grid_display_Screen.dart';
 import 'package:provider/provider.dart';
+import 'dart:typed_data';
 
 class SlicingScreen extends StatefulWidget {
   const SlicingScreen({super.key});
@@ -40,6 +41,27 @@ class _SlicingScreenState extends State<SlicingScreen> {
     if (_errorText == null) {
       print('Image Dimensions: Width: $width inches, Height: $height inches');
       print('Grid Width: $gridWidth inches, Grid Height: $gridHeight inches');
+    }
+  }
+
+  Future<void> sendCommandToPico(String command) async {
+    try {
+      Socket socket = await Socket.connect('192.168.220.128', 80);
+      print('Connected to Pico');
+
+      // Convert the command to bytes
+      List<int> bytes = command.codeUnits;
+      Uint8List data = Uint8List.fromList(bytes);
+
+      // Send the command data
+      socket.add(data);
+      await socket.flush();
+      print('Command sent: $command');
+
+      // Close the socket
+      socket.close();
+    } catch (e) {
+      print('Error: $e');
     }
   }
 
@@ -147,15 +169,18 @@ class _SlicingScreenState extends State<SlicingScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // here will be communication with pi pico
           model.sliceSize = double.tryParse(_gridWidthController.text) ?? 0;
 
-          // _printDimensions();
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GridDisplayScreen(),
-            ),
-          );
+          await sendCommandToPico("led_off");
+          print("LEDON WORKED");
+          //TODO: UNCOMMENT HERE
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => GridDisplayScreen(),
+          //   ),
+          // );
         },
         child: const Text('PRINT'),
       ),
