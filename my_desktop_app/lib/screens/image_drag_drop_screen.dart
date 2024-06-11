@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:my_desktop_app/providers/image_provider.dart';
+import 'package:my_desktop_app/screens/demo_slicing_display.dart';
 import 'package:my_desktop_app/screens/slicing_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:image/image.dart' as img;
@@ -78,10 +79,16 @@ class _DragAndDropPageState extends State<DragAndDropPage> {
         onPressed: model.droppedFiles.isNotEmpty
             ? () async {
                 await _printImageSizes();
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => SlicingScreen(),
+                //   ),
+                // );
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => SlicingScreen(),
+                    builder: (context) => DemoSlicingScreen(),
                   ),
                 );
               }
